@@ -4,18 +4,16 @@ import argparse
 import re
 import sys
 
-'''
-Increments the IDs of rules within Wazuh CIS rulesets by a specified offset.
-Useful when creating custom CIS rulesets from an existing ruleset where both are used as policies
-by Wazuh. When importing policies, Wazuh will a policy upon encountering a duplicate rule within the 
-policy. This tool remedies that issue by creating a copy of the source CIS ruleset with rule IDs 
-incremented by a specified offset.
-'''
-
-
 parser = argparse.ArgumentParser(
-    prog='increment_ids',
-    description='Increment IDs in a YAML file.'
+    prog='cis-step-id',
+    description='''
+                Increments the IDs of rules within Wazuh CIS rulesets by a specified offset.
+                Useful when creating custom CIS rulesets from an existing ruleset where both are 
+                used as policies by Wazuh. When importing policies, Wazuh will skip a policy upon
+                encountering a duplicate rule within the policy. This tool remedies that issue by
+                creating a copy of the source CIS ruleset with rule IDs incremented by a specified 
+                offset.
+                '''
 )
 
 parser.add_argument(
