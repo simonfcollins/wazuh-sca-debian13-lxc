@@ -3622,7 +3622,10 @@ checks:
       # fields are covered by the next rule).
       # ORIGINAL: - 'f:/etc/shadow -> n:^\w+:\S*:\S*:\S*:\S*:(\d+):\S*:\S*:\S* compare >= 7'
       - 'not f:/etc/shadow -> n:^\w+:\S*:\S*:\S*:\S*:(\d+):\S*:\S*:\S* compare < 7'
-      - 'not f:/etc/shadow -> r:^\w+:\S*:\S*:\S*:\S*::\S*:\S*:\S*'
+      # FIX (33210): the original was indescriminate to lines with or without password hashes 
+      #whereas the CIS explicitly limits this requirement to those accounts with passwords set.
+      # ORIGINAL: - 'not f:/etc/shadow -> r:^\w+:\S*:\S*:\S*:\S*::\S*:\S*:\S*'
+      - 'not f:/etc/shadow -> r:^\w+:\$.+:\S*:\S*:\S*::\S*:\S*:\S*'
 
   # 5.4.1.4 Ensure strong password hashing algorithm is configured. (Automated)
   - id: 33211
