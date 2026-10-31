@@ -1,14 +1,9 @@
-# Wazuh SCA policy for Debian 13 – community-fixed edition
-
-`cis_debian13_fixed.yml` is `ruleset/sca/debian/cis_debian13.yml` from wazuh/wazuh **v4.14.8**
-with the rules corrected that no correctly configured Debian 13 system can satisfy. Every change
-keeps the upstream line as a comment (`# ORIGINAL: …`) directly above the corrected line, tagged
-with the check id and the reason – the file header lists all of them.
-
-* `original.yml` – upstream file, byte-identical (for `diff`)
-* `build.py` – produces `cis_debian13_fixed.yml` from `original.yml`; every edit is explicit and
-  validated (YAML parses, 207 checks, no unsupported regex construct left)
-* `cis_debian13_fixed.yml` – the result
+# Wazuh SCA policy for Debian 13 – community-fixed LXC edition
+This version of the Wazuh SCA policy for Debian 13 uses the community-fixed edition with specific
+rules removed. These removed rules are generally not applicable to or incompatible with Linux 
+containers, thus they can generally be safely disregarded. This version of the policy is not
+included in upstream threads or discussions and simply exists to silence rules that would otherwise
+fail if ran in an LXC.
 
 ## Deploy – read this first
 SCA does **not execute commands** from policies that arrive via the manager's shared folder
@@ -18,7 +13,7 @@ that option reports them as "not applicable". Two ways out:
 
 1. **Local file AND local configuration (recommended):** deliver the policy with your
    configuration management to a local path on every agent, e.g.
-   `/var/ossec/etc/sca/cis_debian13_fixed.yml` (root:wazuh 0640), and list it in the agent's own
+   `/var/ossec/etc/sca/cis_debian13_lxc.yml` (root:wazuh 0640), and list it in the agent's own
    `ossec.conf` `<sca><policies>` block. What counts is the *origin of the configuration*, not the
    file location: a policy entry that arrives through the centralized `agent.conf` is treated as
    remote even if it points to a local file, and its commands are ignored. With local
@@ -38,7 +33,7 @@ Local variant – inside the existing `<sca>` block of the agent's `ossec.conf`:
 ```xml
 <policies>
   <policy enabled="no">/var/ossec/ruleset/sca/cis_debian13.yml</policy>
-  <policy>/var/ossec/etc/sca/cis_debian13_fixed.yml</policy>
+  <policy>/var/ossec/etc/sca/cis_debian13_lxc.yml</policy>
 </policies>
 ```
 
@@ -55,27 +50,18 @@ comparing the results of each policy.
 Example:
 ```bash
 sudo chmod +x cis-step-id.py
-./cis-step-id.py --source cis_debian13_lxc.yml --offset 100000 --dest cis_debian13_lxc_new.yml
+./cis-step-id.py --source cis_debian13_lxc.yml --offset 100000 --dest cis_debian13_lxc.yml
+./cis-step-id.py --source cis_debian13_fixed.yml --offset 200000 --dest cis_debian13_fixed.yml
 ```
 
-## Site adaptation
-CIS 4.x lets you choose one firewall front end – comment out the branches you do not use in a
-derived copy (see `policy.id`/`file` metadata; keep ids unique). Organisation-specific exceptions
-belong into such a derived file, never into this one.
-
-For more information on the Wazuh SCA policy for Debian 13 – community fixed edition including
-threads, discussions, and pull requests, please visit the [original repository](
-  https://github.com/sovaris-gmbh/wazuh-sca-debian13.git
-).
-
-License: GNU GPL v2, as upstream.
-
-# Wazuh SCA policy for Debian 13 – community-fixed LXC edition
-This version of the Wazuh SCA policy for Debian 13 uses the community-fixed edition with specific
-rules removed. These removed rules are generally not applicable to or incompatible with Linux 
-containers, thus they can generally be safely disregarded. This version of the policy is not
-included in upstream threads or discussions and simply exists to silence rules that would otherwise
-fail if ran in an LXC.
+Then, add this to the existing`<sca>` block in the agent's `ossec.conf`:
+```xml
+<policies>
+  <policy>/var/ossec/ruleset/sca/cis_debian13.yml</policy>
+  <policy>/var/ossec/etc/sca/cis_debian13_lxc.yml</policy>
+  <policy>/var/ossec/etc/sca/cis_debian13_fixed.yml</policy>
+</policies>
+```
 
 ## Changes
 - CIS 1.4.2: ensures access to bootloader config is configured. Removed because the bootloader is 
@@ -89,3 +75,30 @@ fail if ran in an LXC.
     ) on configuring auditd on Linux with Wazuh.
 
 License: GNU GPL v2, as upstream.
+
+# Wazuh SCA policy for Debian 13 – community-fixed edition
+
+`cis_debian13_fixed.yml` is `ruleset/sca/debian/cis_debian13.yml` from wazuh/wazuh **v4.14.8**
+with the rules corrected that no correctly configured Debian 13 system can satisfy. Every change
+keeps the upstream line as a comment (`# ORIGINAL: …`) directly above the corrected line, tagged
+with the check id and the reason – the file header lists all of them.
+
+* `original.yml` – upstream file, byte-identical (for `diff`)
+* `build.py` – produces `cis_debian13_fixed.yml` from `original.yml`; every edit is explicit and
+  validated (YAML parses, 207 checks, no unsupported regex construct left)
+* `cis_debian13_fixed.yml` – the result
+
+
+
+## Site adaptation
+CIS 4.x lets you choose one firewall front end – comment out the branches you do not use in a
+derived copy (see `policy.id`/`file` metadata; keep ids unique). Organisation-specific exceptions
+belong into such a derived file, never into this one.
+
+For more information on the Wazuh SCA policy for Debian 13 – community fixed edition including
+threads, discussions, and pull requests, please visit the [original repository](
+  https://github.com/sovaris-gmbh/wazuh-sca-debian13.git
+).
+
+License: GNU GPL v2, as upstream.
+
