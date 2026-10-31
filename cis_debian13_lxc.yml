@@ -1,10 +1,9 @@
 # Security Configuration Assessment
-# CIS Checks for Debian Linux 13 - COMMUNITY-FIXED EDITION
+# CIS Checks for Debian Linux 13 - COMMUNITY-FIXED LXC EDITION
 #
 # Derived from: wazuh/wazuh v4.14.8 ruleset/sca/debian/cis_debian13.yml
-# Copyright (C) 2023, Wazuh Inc. - GNU General Public License v2 (unchanged).s
-# Modifications (c) 2026 sovaris - published under the same license.
-# Modifications (c) Simon Collins - published under the same license.
+# Copyright (C) 2023, Wazuh Inc. - GNU General Public License v2 (unchanged).
+# Modifications (c) 2026 sovaris & (c) 2026 Simon Collins - published under the same license.
 #
 # WHY THIS FILE EXISTS
 #   The upstream policy is targeted for Debian 13 operating systems running on bare metal. Linux
@@ -30,9 +29,11 @@
 #
 # Adaptations: 
 #   This file is based on a community-fixed version of the CIS Debian Linux 13 Benchmark created by
-#   sovaris-gmbh@github.com which fixes configuration assessment rules in the upstream policy.
+#   sovaris-gmbh@github.com which fixes configuration assessment rules in the original 
+#   upstream policy.
 #               
-# References: github.com/wazuh/wazuh/discussions/37243, issues/39339, issues/34505,
+# References: github.com/sovaris-gmbh/wazuh-sca-debian13.git,
+#             github.com/wazuh/wazuh/discussions/37243, issues/39339, issues/34505,
 #             documentation.wazuh.com -> Ruleset XML syntax -> Regular expression syntax
 #
 # Based on:
@@ -2922,9 +2923,6 @@ checks:
       - soc_2: ["CC6.1"]
     condition: all
     rules:
-      # FIX (33188): `(d+)` is not valid OS_Regex ('+' only after backslash classes); the check could never pass
-      # (github.com/wazuh/wazuh/discussions/37243).
-      # ORIGINAL: - 'f:/etc/pam.d/common-password -> r:password\s*\t*requisite\s*\t*pam_pwquality.so\s*\t*retry=(d+)'
       - 'f:/etc/pam.d/common-password -> r:password\s*\t*requisite\s*\t*pam_pwquality.so\s*\t*retry=\d+'
 
   # 5.3.2.4 Ensure pam_pwhistory module is enabled. (Automated)
@@ -3048,13 +3046,7 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33193): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:difok\s*\t*=\s*\t*(d+) compare >= 2'
       - 'f:/etc/security/pwquality.conf -> n:difok\s*\t*=\s*\t*(\d+) compare >= 2'
-      # FIX (33193): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'd:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:difok\s*\t*=\s*\t*(d+) compare => 2'
       - 'd:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:difok\s*\t*=\s*\t*(\d+) compare >= 2'
 
   # 5.3.3.2.2 Ensure minimum password length is configured. (Automated)
@@ -3077,13 +3069,7 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33194): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:minlen\s*\t*=\s*\t*(d+) compare >= 14'
       - 'f:/etc/security/pwquality.conf -> n:minlen\s*\t*=\s*\t*(\d+) compare >= 14'
-      # FIX (33194): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'd:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:minlen\s*\t*=\s*\t*(d+) compare => 14'
       - 'd:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:minlen\s*\t*=\s*\t*(\d+) compare >= 14'
 
   # 5.3.3.2.3 Ensure password complexity is configured. (Manual)
@@ -3108,20 +3094,9 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33195): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob; missing `compare` before `< 0`; credits are NEGATIVE numbers (`ucredit = -1`) and `\d+` cannot capture
-      # the sign - now `-(\d+) compare >= 1` = 'negative with magnitude >= 1'
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:ucredit\s*\t*=\s*\t*(d+) compare < 0 && n:lcredit\s*\t*=\s*\t*(d+) compare < 0 && n:dcredit\s*\t*=\s*\t*(d+) compare < 0 && n:ocredit\s*\t*=\s*\t*(d+) < 0'
       - 'f:/etc/security/pwquality.conf -> n:ucredit\s*\t*=\s*\t*-(\d+) compare >= 1 && n:lcredit\s*\t*=\s*\t*-(\d+) compare >= 1 && n:dcredit\s*\t*=\s*\t*-(\d+) compare >= 1 && n:ocredit\s*\t*=\s*\t*-(\d+) compare >= 1'
-      # FIX (33195): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob; missing `compare` before `< 0`; credits are NEGATIVE numbers (`ucredit = -1`) and `\d+` cannot capture
-      # the sign - now `-(\d+) compare >= 1` = 'negative with magnitude >= 1'
-      # ORIGINAL: - 'd:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:ucredit\s*\t*=\s*\t*(d+) compare < 0 && n:lcredit\s*\t*=\s*\t*(d+) compare < 0 && n:dcredit\s*\t*=\s*\t*(d+) compare < 0 && n:ocredit\s*\t*=\s*\t*(d+) < 0'
       - 'd:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:ucredit\s*\t*=\s*\t*-(\d+) compare >= 1 && n:lcredit\s*\t*=\s*\t*-(\d+) compare >= 1 && n:dcredit\s*\t*=\s*\t*-(\d+) compare >= 1 && n:ocredit\s*\t*=\s*\t*-(\d+) compare >= 1'
-      # FIX (33195): CIS 5.3.3.2.3 accepts `minclass = 4` as an alternative to the four credit settings; the upstream
-      # check tested credits only.
       - 'f:/etc/security/pwquality.conf -> !r:^\s*\t*# && n:minclass\s*\t*=\s*\t*(\d+) compare >= 4'
-      # FIX (33195): same alternative for /etc/security/pwquality.conf.d drop-ins.
       - 'd:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> !r:^\s*\t*# && n:minclass\s*\t*=\s*\t*(\d+) compare >= 4'
 
   # 5.3.3.2.4 Ensure password same consecutive characters is configured. (Automated)
@@ -3143,13 +3118,7 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33196): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:maxrepeat\s*\t*=\s*\t*(d+) compare > 0 && n:maxrepeat\s*\t*=\s*\t*(d+) compare =< 3'
       - 'f:/etc/security/pwquality.conf -> n:maxrepeat\s*\t*=\s*\t*(\d+) compare > 0 && n:maxrepeat\s*\t*=\s*\t*(\d+) compare =< 3'
-      # FIX (33196): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'd:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:maxrepeat\s*\t*=\s*\t*(d+) compare > 0 && n:maxrepeat\s*\t*=\s*\t*(d+) compare =< 3'
       - 'd:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:maxrepeat\s*\t*=\s*\t*(\d+) compare > 0 && n:maxrepeat\s*\t*=\s*\t*(\d+) compare =< 3'
 
   # 5.3.3.2.5 Ensure password maximum sequential characters is configured. (Automated)
@@ -3171,13 +3140,7 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33197): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:maxsequence\s*\t*=\s*\t*(d+) compare > 0 && n:maxsequence\s*\t*=\s*\t*(d+) compare =< 3'
       - 'f:/etc/security/pwquality.conf -> n:maxsequence\s*\t*=\s*\t*(\d+) compare > 0 && n:maxsequence\s*\t*=\s*\t*(\d+) compare =< 3'
-      # FIX (33197): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'd:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:maxsequence\s*\t*=\s*\t*(d+) compare > 0 && n:maxsequence\s*\t*=\s*\t*(d+) compare =< 3'
       - 'd:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:maxsequence\s*\t*=\s*\t*(\d+) compare > 0 && n:maxsequence\s*\t*=\s*\t*(\d+) compare =< 3'
 
   # 5.3.3.2.6 Ensure password dictionary check is enabled. (Automated)
@@ -3199,13 +3162,7 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33198): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:dictcheck\s*\t*=\s*\t*(d+) compare != 0'
       - 'f:/etc/security/pwquality.conf -> n:dictcheck\s*\t*=\s*\t*(\d+) compare != 0'
-      # FIX (33198): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'not d:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:dictcheck\s*\t*=\s*\t*(d+) compare = 0'
       - 'not d:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:dictcheck\s*\t*=\s*\t*(\d+) compare = 0'
 
   # 5.3.3.2.7 Ensure password quality checking is enforced. (Automated)
@@ -3224,13 +3181,7 @@ checks:
       - soc_2: ["CC6.1"]
     condition: any
     rules:
-      # FIX (33199): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'f:/etc/security/pwquality.conf -> n:enforcing\s*\t*=\s*\t*(d+) compare != 0'
       - 'f:/etc/security/pwquality.conf -> n:enforcing\s*\t*=\s*\t*(\d+) compare != 0'
-      # FIX (33199): `(d+)` -> `(\d+)` (OS_Regex); `=>` is not a comparison operator; `d:` takes a directory path, not
-      # a glob
-      # ORIGINAL: - 'not d:/etc/security/pwquality.conf.d/* -> r:\.+.conf$ -> n:enforcing\s*\t*=\s*\t*(d+) compare = 0'
       - 'not d:/etc/security/pwquality.conf.d -> r:\.+.conf$ -> n:enforcing\s*\t*=\s*\t*(\d+) compare = 0'
 
   # 5.3.3.2.8 Ensure password quality is enforced for the root user. (Automated)
@@ -3290,9 +3241,6 @@ checks:
       - soc_2: ["CC6.1"]
     condition: all
     rules:
-      # FIX (33202): pam_pwhistory needs `remember=N`; the original regex demanded `remember` immediately followed by
-      # `enforce_for_root`. Segments are matched on the same line independently, so option order no longer matters.
-      # ORIGINAL: - 'f:/etc/pam.d/common-password -> !r:^\s*\t*# && r:\s*\t*password\s*\t*requisite\s*\t*pam_pwhistory.so\s*\t*remember\s*\t*enforce_for_root'
       - 'f:/etc/pam.d/common-password -> !r:^\s*\t*# && r:pam_pwhistory.so && r:remember=\d+ && r:enforce_for_root'
 
   # 5.3.3.3.3 Ensure pam_pwhistory includes use_authtok. (Automated)
@@ -3317,8 +3265,6 @@ checks:
       - soc_2: ["CC6.1"]
     condition: all
     rules:
-      # FIX (33203): same defect as 33202; `use_authtok` checked as an independent segment.
-      # ORIGINAL: - 'f:/etc/pam.d/common-password -> !r:^\s*\t*# && r:\s*\t*password\s*\t*requisite\s*\t*pam_pwhistory.so\s*\t*remember\s*\t*enforce_for_root\s*\t*use_authtok'
       - 'f:/etc/pam.d/common-password -> !r:^\s*\t*# && r:pam_pwhistory.so && r:remember=\d+ && r:enforce_for_root && r:use_authtok'
 
   # 5.3.3.4.1 Ensure pam_unix does not include nullok. (Automated)
@@ -3365,25 +3311,12 @@ checks:
       - soc_2: ["CC6.1"]
     condition: none
     rules:
-      # FIX (33205): CIS 5.3.3.4.2 forbids `remember` on the pam_unix.so line only; the bare word also matched the
-      # pam_pwhistory line that check 33201 requires (mutually exclusive checks).
-      # ORIGINAL: - "f:/etc/pam.d/common-password -> r:remember"
       - "f:/etc/pam.d/common-password -> r:pam_unix.so && r:remember"
-      # FIX (33205): CIS 5.3.3.4.2 forbids `remember` on the pam_unix.so line only; the bare word also matched the
-      # pam_pwhistory line that check 33201 requires (mutually exclusive checks).
-      # ORIGINAL: - "f:/etc/pam.d/common-auth -> r:remember"
+      - "f:/etc/pam.d/common-auth -> r:pam_unix.so && r:remember
+      - "f:/etc/pam.d/common-password -> r:pam_unix.so && r:remember"
       - "f:/etc/pam.d/common-auth -> r:pam_unix.so && r:remember"
-      # FIX (33205): CIS 5.3.3.4.2 forbids `remember` on the pam_unix.so line only; the bare word also matched the
-      # pam_pwhistory line that check 33201 requires (mutually exclusive checks).
-      # ORIGINAL: - "f:/etc/pam.d/common-account -> r:remember"
       - "f:/etc/pam.d/common-account -> r:pam_unix.so && r:remember"
-      # FIX (33205): CIS 5.3.3.4.2 forbids `remember` on the pam_unix.so line only; the bare word also matched the
-      # pam_pwhistory line that check 33201 requires (mutually exclusive checks).
-      # ORIGINAL: - "f:/etc/pam.d/common-session -> r:remember"
       - "f:/etc/pam.d/common-session -> r:pam_unix.so && r:remember"
-      # FIX (33205): CIS 5.3.3.4.2 forbids `remember` on the pam_unix.so line only; the bare word also matched the
-      # pam_pwhistory line that check 33201 requires (mutually exclusive checks).
-      # ORIGINAL: - "f:/etc/pam.d/common-session-noninteractive -> r:remember"
       - "f:/etc/pam.d/common-session-noninteractive -> r:pam_unix.so && r:remember"
 
   # 5.3.3.4.3 Ensure pam_unix includes a strong password hashing algorithm. (Automated)
@@ -3501,9 +3434,6 @@ checks:
     condition: all
     rules:
       - 'f:/etc/login.defs -> n:^\s*PASS_WARN_AGE\s*\t*(\d+) compare >= 7'
-      # FIX (33210): the original passed only if SOME line had warn>=7; intent is that NO line has warn<7 (empty
-      # fields are covered by the next rule).
-      # ORIGINAL: - 'f:/etc/shadow -> n:^\w+:\S*:\S*:\S*:\S*:(\d+):\S*:\S*:\S* compare >= 7'
       - 'not f:/etc/shadow -> n:^\w+:\S*:\S*:\S*:\S*:(\d+):\S*:\S*:\S* compare < 7'
       - 'not f:/etc/shadow -> r:^\w+:\S*:\S*:\S*:\S*::\S*:\S*:\S*'
 
@@ -3527,15 +3457,9 @@ checks:
       - pci_dss_v3.2.1: ["3.4", "3.4.1", "8.2.1"]
       - pci_dss_v4.0: ["3.1.1", "3.3.2", "3.3.3", "3.5.1", "3.5.1.2", "3.5.1.3", "8.3.2"]
       - soc_2: ["CC6.1"]
-    # FIX (33211): condition 'all' -> 'any': SHA512 and YESCRYPT are alternatives, not both required.
-    # ORIGINAL: condition: all
     condition: any
     rules:
-      # FIX (33211): active setting only (unanchored regex also matched comment lines).
-      # ORIGINAL: - 'f:/etc/login.defs -> r:ENCRYPT_METHOD\s*\t*SHA512'
       - 'f:/etc/login.defs -> !r:^\s*\t*# && r:^ENCRYPT_METHOD\s*\t*SHA512'
-      # FIX (33211): active setting only (unanchored regex also matched comment lines).
-      # ORIGINAL: - 'f:/etc/login.defs -> r:ENCRYPT_METHOD\s*\t*YESCRYPT'
       - 'f:/etc/login.defs -> !r:^\s*\t*# && r:^ENCRYPT_METHOD\s*\t*YESCRYPT'
 
   # 5.4.1.5 Ensure inactive password lock is configured. (Automated)
@@ -3559,9 +3483,6 @@ checks:
     rules:
       - 'c:useradd -D -> n:^INACTIVE=(\d+) compare <= 45'
       - "not c:useradd -D -> r:^INACTIVE=-1"
-      # FIX (33212): the original required at least one UNLOCKED account with inactive<=45 - impossible on key-only
-      # systems where every account is locked. Intent: no unlocked account with inactive>45.
-      # ORIGINAL: - 'f:/etc/shadow -> !r:^\w+:!|^\w+:\p: && n:^\w+:\S*:\S*:\S*:\S*:\S*:(\d+):\S*:\S* compare <= 45'
       - 'not f:/etc/shadow -> !r:^\w+:!|^\w+:\p: && n:^\w+:\S*:\S*:\S*:\S*:\S*:(\d+):\S*:\S* compare > 45'
       - 'not f:/etc/shadow -> !r:^\w+:!|^\w+:\p: && r:^\w+:\S*:\S*:\S*:\S*:\S*::\S*:\S*'
 
@@ -3651,9 +3572,6 @@ checks:
       - pci_dss_v3.2.1: ["7.1", "7.1.1", "7.1.2", "7.1.3"]
       - pci_dss_v4.0: ["1.3.1", "7.1"]
       - soc_2: ["CC5.2", "CC6.1"]
-    # FIX (33217): condition 'all' -> 'any': `passwd -S root` reports either L (locked) or P (password set); requiring
-    # both is impossible (same defect as github.com/wazuh/wazuh/issues/39339).
-    # ORIGINAL: condition: all
     condition: any
     rules:
       - 'c:passwd -S root -> r:root\s*\t*L'
@@ -3662,7 +3580,6 @@ checks:
   # 5.4.2.5 Ensure root path integrity. (Automated) - Not Implemented
   # 5.4.2.6 Ensure root user umask is configured. (Automated) - Not Implemented
   # 5.4.2.7 Ensure system accounts do not have a valid login shell. (Automated) - Not Implemented
-
   # 5.4.2.8 Ensure accounts without a valid login shell are locked. (Automated) - Not Implemented
 
   # 5.4.3.1 Ensure nologin is not listed in /etc/shells. (Automated)
@@ -3957,19 +3874,19 @@ checks:
   # 6.1.3.8 Ensure logrotate is configured. (Manual) - Not Implemented
   # 6.1.4.1 Ensure access to all logfiles has been configured. (Automated) - Not Implemented
 
-  # 6.2.1.1 Ensure auditd packages are installed. (Automated)
-  # 6.2.1.2 Ensure auditd service is enabled and active. (Automated)
-  # 6.2.1.3 Ensure auditing for processes that start prior to auditd is enabled. (Automated)
-  # 6.2.1.4 Ensure audit_backlog_limit is sufficient. (Automated)
-  # 6.2.2.1 Ensure audit log storage size is configured. (Automated)
-  # 6.2.2.2 Ensure audit logs are not automatically deleted. (Automated)
-  # 6.2.2.3 Ensure system is disabled when audit logs are full. (Automated)
-  # 6.2.2.4 Ensure system warns when audit logs are low on space. (Automated)
-  # 6.2.3.1 Ensure changes to system administration scope (sudoers) is collected. (Automated)
-  # 6.2.3.2 Ensure actions as another user are always logged. (Automated)
-  # 6.2.3.3 Ensure events that modify the sudo log file are collected. (Automated)
-  # 6.2.3.4 Ensure events that modify date and time information are collected. (Automated)
-  # 6.2.3.5 Ensure events that modify the system's network environment are collected. (Automated)
+  # 6.2.1.1 Ensure auditd packages are installed. (Automated) - Not Implemented
+  # 6.2.1.2 Ensure auditd service is enabled and active. (Automated) - Not Implemented
+  # 6.2.1.3 Ensure auditing for processes that start prior to auditd is enabled. (Automated) - Not Implemented
+  # 6.2.1.4 Ensure audit_backlog_limit is sufficient. (Automated) - Not Implemented
+  # 6.2.2.1 Ensure audit log storage size is configured. (Automated) - Not Implemented
+  # 6.2.2.2 Ensure audit logs are not automatically deleted. (Automated) - Not Implemented
+  # 6.2.2.3 Ensure system is disabled when audit logs are full. (Automated) - Not Implemented
+  # 6.2.2.4 Ensure system warns when audit logs are low on space. (Automated) - Not Implemented
+  # 6.2.3.1 Ensure changes to system administration scope (sudoers) is collected. (Automated) - Not Implemented
+  # 6.2.3.2 Ensure actions as another user are always logged. (Automated) - Not Implemented
+  # 6.2.3.3 Ensure events that modify the sudo log file are collected. (Automated) - Not Implemented
+  # 6.2.3.4 Ensure events that modify date and time information are collected. (Automated) - Not Implemented
+  # 6.2.3.5 Ensure events that modify the system's network environment are collected. (Automated) - Not Implemented
   # 6.2.3.6 Ensure use of privileged commands are collected. (Automated) - Not Implemented
   # 6.2.3.7 Ensure unsuccessful file access attempts are collected. (Automated) - Not Implemented
   # 6.2.3.8 Ensure events that modify user/group information are collected. (Automated) - Not Implemented
@@ -4317,9 +4234,6 @@ checks:
       - soc_2: ["CC6.1"]
     condition: all
     rules:
-      # FIX (33300): bracket character classes are not supported by OS_Regex; `\w` already includes @ - _ so the
-      # intent is preserved (github.com/wazuh/wazuh/discussions/37243).
-      # ORIGINAL: - 'not f:/etc/passwd -> !r:^[\w@-]+:x:'
       - 'not f:/etc/passwd -> !r:^\w+:x:'
 
   # 7.2.2 Ensure /etc/shadow password fields are not empty. (Automated)
